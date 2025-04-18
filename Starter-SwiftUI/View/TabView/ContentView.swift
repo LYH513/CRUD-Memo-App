@@ -10,18 +10,24 @@ import SwiftUI
 struct ContentView: View {
     @EnvironmentObject var navigationManager: NavigationManager
     
+    @ObservedObject private var viewModel: HomeViewModel
+    
+    init(viewModel: HomeViewModel) {
+        self.viewModel = viewModel
+    }
+    
     var body: some View {
         ZStack(alignment: .bottom){
             
             switch navigationManager.currentTab {
             case .HomeView :
-                HomeView()
+                HomeView(viewModel: viewModel)
             case .MyView :
                 MyView()
             case .MoreView:
                 MoreView()
             default:
-                HomeView()
+                HomeView(viewModel: viewModel)
             }
             
             CustomTabView(currentView: navigationManager.currentTab)
@@ -32,6 +38,9 @@ struct ContentView: View {
         
 
 #Preview {
-    ContentView()
+    let repository = BoardRepository()
+    let homeViewModel = HomeViewModel(boardRepository: repository)
+    
+    ContentView(viewModel: homeViewModel)
         .environmentObject(NavigationManager())
 }

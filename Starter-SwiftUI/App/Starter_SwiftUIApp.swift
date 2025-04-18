@@ -38,15 +38,21 @@ struct Starter_SwiftUIApp: App {
     @StateObject private var navigationManager = NavigationManager()
     
     var body: some Scene {
+        
+        let repository = BoardRepository()
+        let homeViewModel = HomeViewModel(boardRepository: repository)
+        let detailViewModel = DetailViewModel(boardRepository: repository)
+        let writeViewModel = WriteViewModel(boardRepository: repository)
+        
         WindowGroup {
             NavigationStack(path: $navigationManager.path) {
-                ContentView()
+                ContentView(viewModel: homeViewModel)
                     .navigationDestination(for: ViewType.self) { path in
                         switch path{
                         case .DetailView(let boardID):
-                            DetailView(boardID: boardID)
+                            DetailView(viewModel: detailViewModel, boardID: boardID)
                         case .WriteView(let boardID):
-                            WriteView(boardID: boardID)
+                            WriteView(viewModel: writeViewModel, boardID: boardID)
                         default :
                             EmptyView()
                         }

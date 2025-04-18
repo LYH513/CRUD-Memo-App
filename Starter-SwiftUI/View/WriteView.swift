@@ -9,11 +9,14 @@ import SwiftUI
 
 struct WriteView: View {
     @EnvironmentObject var navigationManager: NavigationManager
+    
+    @ObservedObject private var viewModel: WriteViewModel
     var boardID: String?
     
-    @State private var userName: String = "이유현"
-    @State private var title : String = ""
-    @State private var contents: String = ""
+    init(viewModel: WriteViewModel, boardID: String? = nil) {
+        self.viewModel = viewModel
+        self.boardID = boardID
+    }
     
     var body: some View {
 
@@ -45,7 +48,7 @@ struct WriteView: View {
                 .bold()
                 .padding(.leading, 15)
             
-            TextField("사용자 이름 입력하세요", text: $userName)
+            TextField("사용자 이름 입력하세요", text: $viewModel.userName)
                 .textFieldStyle(.roundedBorder)
                 .padding()
             
@@ -54,7 +57,7 @@ struct WriteView: View {
                 .bold()
                 .padding(.leading, 15)
             
-            TextField("제목을 입력하세요", text: $title)
+            TextField("제목을 입력하세요", text: $viewModel.title)
                 .textFieldStyle(.roundedBorder)
                 .padding()
             
@@ -65,12 +68,12 @@ struct WriteView: View {
             
             ZStack(alignment: .topLeading) {
                 
-                TextEditor(text: $contents)
+                TextEditor(text: $viewModel.contents)
                     .frame(height: 120)
                     .cornerRadius(10)
                     .padding()
                 
-                if contents.isEmpty {
+                if viewModel.contents.isEmpty {
                     Text("내용을 입력하세요")
                         .foregroundColor(Color(hex: "D3D3D3"))
                         .padding()
@@ -87,7 +90,24 @@ struct WriteView: View {
             Spacer()
             
             Button(action: {
-                navigationManager.pop()
+                if viewModel.userName.isEmpty || viewModel.title.isEmpty || viewModel.contents.isEmpty {
+                    print("⚠️ 모든 필드를 입력해주세요.")
+                    return
+                }
+                
+                Task{
+                    if let id = boardID {
+                        //edit
+                        let data = BoardModel(userName: viewModel.userName, title: viewModel.title, contents: viewModel.contents)
+                        await viewModel.updateBoardDetail(id, data: data)
+                    } else {
+                        //post
+                        let data = BoardModel(userName: viewModel.userName, title: viewModel.title, contents: viewModel.contents)
+                        await viewModel.postBoard(data)
+                    }
+                    navigationManager.pop()
+                    
+                }
             }){
                 Text("확인")
                     .font(.title3)
@@ -103,9 +123,14 @@ struct WriteView: View {
         } // : VStack
         .frame(maxWidth:.infinity, maxHeight: .infinity )
         .navigationBarBackButtonHidden(true)
+        .onAppear{
+            Task{
+                await viewModel.getBoardDetail(boardID)
+            }
+        }
     }
 }
 
 #Preview {
-    WriteView()
+    WriteView(viewModel: WriteViewModel(boardRepository: BoardRepository()), boardID: nil)
 }

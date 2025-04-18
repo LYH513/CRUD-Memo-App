@@ -12,7 +12,7 @@ struct BoardModel: Hashable, Codable {
     var userName: String
     var title : String
     var contents: String
-    var createAt: String
+    var createdAt: String?
 }
 
 extension BoardModel {
@@ -22,21 +22,21 @@ extension BoardModel {
             userName: "Alice",
             title: "첫 번째 게시글",
             contents: "안녕하세요! 여기는 첫 번째 게시글입니다.안녕하세요! 여기는 첫 번째 게시글입니다.안녕하세요! 여기는 첫 번째 게시글입니다.",
-            createAt: "2025-04-17 10:00"
+            createdAt: "2025-04-17 10:00"
         ),
         BoardModel(
             boardID: "2",
             userName: "Bob",
             title: "두 번째 게시글",
             contents: "SwiftUI 정말 재밌어요!SwiftUI 정말 재밌어요!SwiftUI 정말 재밌어요!",
-            createAt: "2025-04-17 11:00"
+            createdAt: "2025-04-17 11:00"
         ),
         BoardModel(
             boardID: "3",
             userName: "Charlie",
             title: "질문 있습니다",
             contents: "Codable과 Hashable 같이 쓰는 이유가 뭔가요?Codable과 Hashable 같이 쓰는 이유가 뭔가요?Codable과 Hashable 같이 쓰는 이유가 뭔가요?",
-            createAt: "2025-04-17 12:00"
+            createdAt: "2025-04-17 12:00"
         )
     ]
 }

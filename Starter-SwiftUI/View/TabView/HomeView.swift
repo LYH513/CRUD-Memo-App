@@ -10,6 +10,14 @@ import SwiftUI
 struct HomeView: View {
     @EnvironmentObject var navigationManager: NavigationManager
     
+    @ObservedObject private var viewModel: HomeViewModel
+    
+    init(viewModel: HomeViewModel) {
+        self.viewModel = viewModel
+    }
+    
+    @State private var boardList: [BoardModel] = []
+    
     var body: some View {
             VStack(spacing: 0){
                 HStack(spacing: 0){
@@ -35,7 +43,7 @@ struct HomeView: View {
                     Spacer()
                         .frame(height: 15)
                     
-                    ForEach(BoardModel.mockData, id:\.self){ item in
+                    ForEach(boardList, id:\.boardID){ item in
                         VStack(alignment: .leading){
                             HStack{
                                 Text(item.userName)
@@ -44,11 +52,12 @@ struct HomeView: View {
                                 
                                 Spacer()
                                 
-                                Text(item.createAt)
+                                Text(item.createdAt ?? " ")
                                 
                                 Spacer()
                             } // HStack
-                            .padding()
+                            .padding(.horizontal)
+                            .padding(.top)
                             
                             Text("✏️ \(item.title)")
                                 .font(.system(size:20))
@@ -76,12 +85,18 @@ struct HomeView: View {
                     
                 } // : ScrollView
                 .frame(maxWidth:.infinity, maxHeight: .infinity )
+                .padding(.bottom, 100)
                 .background(Color(hex: "fea443"))
             } // : VStack
+            .onAppear {
+                Task {
+                    boardList = await viewModel.getBoardList()
+                }
+            }
     }
 }
 
 #Preview {
-    HomeView()
+    HomeView(viewModel: HomeViewModel(boardRepository: BoardRepository()))
         .environmentObject(NavigationManager())
 }

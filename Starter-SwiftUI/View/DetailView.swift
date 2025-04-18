@@ -9,7 +9,14 @@ import SwiftUI
 
 struct DetailView: View {
     @EnvironmentObject var navigationManager: NavigationManager
+    
+    @ObservedObject private var viewModel: DetailViewModel
     var boardID: String?
+    
+    init(viewModel: DetailViewModel, boardID: String? = nil) {
+        self.viewModel = viewModel
+        self.boardID = boardID
+    }
     
     var body: some View {
         VStack(alignment: .leading,spacing:0){
@@ -24,7 +31,7 @@ struct DetailView: View {
                 }
                 .padding(.leading, 10)
                 
-                Text(BoardModel.mockData[0].title)
+                Text(viewModel.detailBoard.title)
                     .foregroundColor(.white)
                     .font(.largeTitle).bold()
                     .padding()
@@ -43,7 +50,10 @@ struct DetailView: View {
                 
                 Button(action: {
                     // 삭제 로직
-                    navigationManager.pop()
+                    Task{
+                        await viewModel.deleteBoardDetail(boardID)
+                        navigationManager.pop()
+                    }
                 }){
                     Image(systemName: "trash")
                         .font(.system(size: 30))
@@ -57,14 +67,14 @@ struct DetailView: View {
             
             VStack(alignment: .leading){
                 HStack{
-                    Text("이름")
-                    Text("날짜")
+                    Text(viewModel.detailBoard.userName)
+                    Text(viewModel.detailBoard.createdAt ?? "")
                     
                     Spacer()
                 }
                 .padding(.bottom, 10)
                 
-                Text("내용")
+                Text(viewModel.detailBoard.contents)
                 
                 Spacer()
             }
@@ -80,9 +90,12 @@ struct DetailView: View {
             
         } // : Vstack
         .navigationBarBackButtonHidden(true)
+        .task {
+            await viewModel.getBoardDetail(boardID ?? nil)
+        }
     }
 }
 
 #Preview {
-    DetailView()
+    DetailView(viewModel: DetailViewModel(boardRepository: BoardRepository()), boardID: nil)
 }
